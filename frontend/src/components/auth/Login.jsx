@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthCard from "./AuthCard";
 import { getDeviceId } from "../../utils/device";
 import { getFCMToken } from "../../utils/fcm";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ export default function LoginForm() {
       const fcmToken = await getFCMToken();
 
       // 🔥 Using proxy - relative URL instead of full URL
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch(`${ API_BASE }/auth/login`, {
         method: "POST",
         credentials: "include", // 🔥 CRITICAL: This was missing!
         headers: {

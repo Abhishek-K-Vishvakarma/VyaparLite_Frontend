@@ -10,7 +10,7 @@ export default function Logout() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/auth/logout", {
+      const res = await fetch("/auth/logout", {
         method: "POST",
         credentials: "include", // 🔥 Important for cookies
         headers: {
