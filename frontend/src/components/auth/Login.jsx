@@ -45,8 +45,14 @@ export default function LoginForm() {
         }),
       });
 
-      const data = await res.json();
-      console.log("📥 Login response:", data);
+      let data;
+
+      if (res.headers.get("content-type")?.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text);
+      }
 
       if (!res.ok) {
         throw new Error(data.message || "Login failed");
