@@ -61,7 +61,7 @@ export default function LoginForm() {
       console.log("✅ Login successful, cookie should be set");
 
       // 🔥 Test immediately if cookie works
-      const testRes = await fetch("/api/notification/countNotifications", {
+      const testRes = await fetch(`${ API_BASE}/notification/countNotifications`, {
         method: "GET",
         credentials: "include",
         headers: {

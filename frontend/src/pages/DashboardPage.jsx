@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 import StatCard from "../components/dashboard/StatsCard";
 import ReportsPage from "./ReportsPage";
@@ -14,13 +15,13 @@ export default function DashboardPage() {
     const fetchDashboardStats = async () => {
       try {
         /* -------- TODAY SALES + INVOICES -------- */
-        const dailyRes = await axios.get("/api/report/daily");
+        const dailyRes = await axios.get(`${API_BASE}/report/daily`);
 
         setTodaySales(dailyRes.data.total);
         setInvoiceCount(dailyRes.data.count);
 
         /* -------- PRODUCTS -------- */
-        const productRes = await axios.get("/api/product/my-products");
+        const productRes = await axios.get(`${API_BASE}/product/my-products`);
 
         setTotalProducts(productRes.data.length);
 

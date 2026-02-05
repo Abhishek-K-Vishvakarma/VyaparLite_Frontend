@@ -4,6 +4,7 @@ import axios from "axios";
 import SalesChart from "../components/reports/SalesChart";
 import ProductChart from "../components/reports/ProductChart";
 import StockAlertCard from "../components/reports/StockAlertCard";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function ReportsPage() {
   const [dailySales, setDailySales] = useState([]);
@@ -16,7 +17,7 @@ export default function ReportsPage() {
   useEffect(() => {
     /* -------- DAILY SALES CHART -------- */
     const fetchDailyChart = async () => {
-      const res = await axios.get("/api/report/chart");
+      const res = await axios.get(`${API_BASE}/report/chart`);
 
       const formatted = res.data.map((item) => ({
         label: `${ item._id.day }/${ item._id.month }`,
@@ -28,7 +29,7 @@ export default function ReportsPage() {
 
     /* -------- MONTHLY SALES -------- */
     const fetchMonthlyReport = async () => {
-      const res = await axios.get("/api/report/monthly");
+      const res = await axios.get(`${API_BASE}/report/monthly`);
 
       // monthly total trend (single month example)
       setMonthlySales([
@@ -41,7 +42,7 @@ export default function ReportsPage() {
 
     /* -------- PRODUCTS + LOW STOCK -------- */
     const fetchProducts = async () => {
-      const res = await axios.get("/api/product");
+      const res = await axios.get(`${API_BASE}/api/product`);
 
       setTotalProducts(res.data.length);
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function MyShop() {
   const [shops, setShops] = useState([]);
@@ -15,7 +16,7 @@ export default function MyShop() {
   // ================= FETCH SHOPS =================
   const fetchMyShops = async () => {
     try {
-      const res = await fetch("/api/shop/my/shop", {
+      const res = await fetch(`${API_BASE}/shop/my/shop`, {
         credentials: "include"
       });
       const data = await res.json();
@@ -36,7 +37,7 @@ export default function MyShop() {
     e.preventDefault();
 
     try {
-      const res = await fetch("/api/shop/create", {
+      const res = await fetch(`${API_BASE}/shop/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

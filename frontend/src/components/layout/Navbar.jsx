@@ -2,6 +2,7 @@ import { Bell, User, Menu, LogOut, Mail, Shield } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import NotificationPanel from "../notifications/NotificationList";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function Navbar({ onMenuClick }) {
   const [notificationCount, setNotificationCount] = useState(0);
@@ -42,7 +43,7 @@ export default function Navbar({ onMenuClick }) {
   const fetchNotificationCount = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/notification/countNotifications", {
+      const res = await fetch(`${ API_BASE}/notification/countNotifications`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -70,7 +71,7 @@ export default function Navbar({ onMenuClick }) {
     try {
       setLogoutLoading(true);
 
-      const res = await fetch("/api/auth/logout", {
+      const res = await fetch(`${ API_BASE}/auth/logout`, {
         method: "POST",
         credentials: "include",
         headers: {
