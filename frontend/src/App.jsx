@@ -36,7 +36,8 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import ProductList from './components/product/ProductList.jsx';
 import BillingPage from './pages/BillingPage.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
-
+import MyShop from './services/shop.jsx';
+import Footer from './components/ui/Footer.jsx';
 function App() {
   return (
     <Router>
@@ -51,6 +52,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout />
+              <Footer/>
             </ProtectedRoute>
           }
         >
@@ -62,6 +64,7 @@ function App() {
 
           {/* Billing */}
           <Route path="billing" element={<BillingPage />} />
+          <Route path='shop' element={<MyShop/>}/>
         </Route>
 
         {/* ============= CATCH ALL ============= */}

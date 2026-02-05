@@ -12,7 +12,6 @@ export default function LoginPage() {
           method: "GET",
           credentials: "include",
         });
-
         setIsAuth(res.ok);
       } catch {
         setIsAuth(false);

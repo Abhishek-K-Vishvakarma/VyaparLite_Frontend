@@ -1,4 +1,4 @@
-import { Home, FileText, Package, X, CreditCard, Receipt } from "lucide-react";
+import { Home, FileText, Package, X, CreditCard, Receipt, ShoppingBag } from "lucide-react";
 import Logo from "../ui/Logo";
 import { Link } from "react-router-dom";
 export default function Sidebar({ open, setOpen }) {
@@ -15,6 +15,7 @@ export default function Sidebar({ open, setOpen }) {
           <Link to="/product"><SidebarItem icon={<Package size={20} />} label="Products" /></Link>
           <Link><SidebarItem icon={<FileText size={20} />} label="Invoices" /></Link>
           <Link to="/billing"><SidebarItem icon={<CreditCard size={20} />} label="Billing" /></Link>
+          <Link to="/shop"><SidebarItem icon={<ShoppingBag size={20} />} label="Shop" /></Link>
         </nav>
       </aside>
 
@@ -54,6 +55,20 @@ export default function Sidebar({ open, setOpen }) {
             label="Invoices"
             onClick={() => setOpen(false)}
           />
+          <Link to="/billing">
+            <SidebarItem
+              icon={<CreditCard size={20} />}
+              label="Billing"
+              onClick={() => setOpen(false)}
+            />
+          </Link>
+          <Link to="/shop">
+            <SidebarItem
+              icon={<ShoppingBag size={20} />}
+              label="Shop"
+              onClick={() => setOpen(false)}
+            />
+          </Link>
         </nav>
       </aside>
     </>

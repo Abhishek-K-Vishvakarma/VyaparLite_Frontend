@@ -1,10 +1,9 @@
-import { X, Check } from "lucide-react";
+import { X, Check, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function NotificationPanel({ onClose }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     fetchNotifications();
   }, []);
@@ -46,7 +45,20 @@ export default function NotificationPanel({ onClose }) {
       prev.map((n) => ({ ...n, isRead: true }))
     );
   };
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      await fetch(`/api/notification/deleteNotification/${ notificationId }`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
+      setNotifications((prev) =>
+        prev.filter((n) => n._id !== notificationId)
+      );
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
       {/* Overlay */}
@@ -100,11 +112,12 @@ export default function NotificationPanel({ onClose }) {
                 {!n.isRead && (
                   <button
                     onClick={() => markAsRead(n._id)}
-                    className="mt-2 flex items-center gap-1 text-xs text-green-600"
+                    className="mt-2 flex items-center gap-1 text-xs text-green-600 cursor-pointer"
                   >
                     <Check size={14} /> Mark as read
                   </button>
                 )}
+                <button onClick={() => handleDeleteNotification(n._id)} className="cursor-pointer"><Trash2 size={14} color="red"/></button>
               </div>
             ))
           )}

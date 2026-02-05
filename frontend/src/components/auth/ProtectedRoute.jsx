@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children }) {
       try {
         const res = await fetch("/api/auth/myProfile", {
           method: "GET",
-          credentials: "include", // 👈 COOKIE IMPORTANT
+          credentials: "include", // COOKIE IMPORTANT
         });
 
         if (res.ok) {
