@@ -4,19 +4,16 @@ import ProductSearch from "../components/billing/ProductSearch";
 import BillTable from "../components/billing/BillTable";
 import BillSummary from "../components/billing/BillSummary";
 import { calculateAmount } from "../utils/Calc";
-import { createSale } from "../services/saleService";
-import { downloadInvoice } from "../services/invoiceService";
-
+import { createSale } from "../services/SaleService";
+import { downloadInvoice } from "../services/InvoiceService";
+import url from "../network/UrlProvider";
 export default function BillingPage({ token }) {
   const [products, setProducts] = useState([]);
   const [billItems, setBillItems] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("/api/product/my-products", {
-        headers: {
-          Authorization: `Bearer ${ token }`,
-        },
+    axios.get(`${url}/product/my-products`, {
+        withCredentials: true
       })
       .then((res) => setProducts(res.data))
       .catch(console.error);

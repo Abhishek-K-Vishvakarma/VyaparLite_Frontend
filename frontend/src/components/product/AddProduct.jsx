@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import url from "../../network/UrlProvider";
 export default function AddProduct({ onClose, editData, onSuccess }) {
   const [form, setForm] = useState({
     name: "",
@@ -28,13 +28,13 @@ export default function AddProduct({ onClose, editData, onSuccess }) {
     e.preventDefault();
     setLoading(true);
 
-    const url = editData
-      ? `/api/product/put-product/${ editData._id }`
-      : "/api/product/add";
+    const urls = editData
+      ? `${url}/product/put-product/${ editData._id }`
+      : `${url}/product/add`;
 
     const method = editData ? "PUT" : "POST";
 
-    const res = await fetch(url, {
+    const res = await fetch(urls, {
       method,
       credentials: "include",
       headers: { "Content-Type": "application/json" },

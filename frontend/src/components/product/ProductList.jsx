@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AddProduct from "./AddProduct";
+import url from "../../network/UrlProvider";
 
 /* ================= HELPERS ================= */
 
@@ -50,7 +51,7 @@ export default function ProductList() {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/product/my-products", {
+      const res = await fetch(`${url}/product/my-products`, {
         credentials: "include",
       });
 
@@ -75,7 +76,7 @@ export default function ProductList() {
 
     if (!window.confirm("Delete this product?")) return;
 
-    const res = await fetch(`/api/product/del-product/${ p._id }`, {
+    const res = await fetch(`${url}/product/del-product/${ p._id }`, {
       method: "DELETE",
       credentials: "include",
     });

@@ -1,13 +1,13 @@
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import url from "../../network/UrlProvider";
 export default function ProtectedRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("/api/auth/myProfile", {
+        const res = await fetch(`${url}/auth/myProfile`, {
           method: "GET",
           credentials: "include", // COOKIE IMPORTANT
         });

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthCard from "./AuthCard";
 import { getDeviceId } from "../../utils/device";
 import { getFCMToken } from "../../utils/fcm";
-const API_BASE = import.meta.env.VITE_API_URL;
+import url from "../../network/UrlProvider";
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -30,10 +30,9 @@ export default function LoginForm() {
       const deviceId = getDeviceId();
       const fcmToken = await getFCMToken();
 
-      // 🔥 Using proxy - relative URL instead of full URL
-      const res = await fetch(`${ API_BASE }/auth/login`, {
+      const res = await fetch(`${ url }/auth/login`, {
         method: "POST",
-        credentials: "include", // 🔥 CRITICAL: This was missing!
+        credentials: "include", // 🔥 required for cookies
         headers: {
           "Content-Type": "application/json",
         },
@@ -45,44 +44,32 @@ export default function LoginForm() {
         }),
       });
 
-      let data;
+      // 🔐 SAFELY parse response
+      let data = null;
+      const contentType = res.headers.get("content-type");
 
-      if (res.headers.get("content-type")?.includes("application/json")) {
+      if (contentType && contentType.includes("application/json")) {
         data = await res.json();
       } else {
         const text = await res.text();
-        throw new Error(text);
+        throw new Error(text || "Unexpected server response");
       }
 
       if (!res.ok) {
-        throw new Error(data.message || "Login failed");
+        throw new Error(data?.message || "Login failed");
       }
 
-      // 🔥 Optional: Store user info (but NOT token in localStorage for security)
+      // ✅ Save minimal user info (NO TOKEN)
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // 🔥 Note: Token is now in httpOnly cookie, not in localStorage
-      // localStorage.setItem("token", data.token); // ❌ Remove this line
+      console.log("✅ Login successful, cookie set");
 
-      console.log("✅ Login successful, cookie should be set");
-
-      // 🔥 Test immediately if cookie works
-      const testRes = await fetch(`${ API_BASE}/notification/countNotifications`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const testData = await testRes.json();
-      console.log("🔔 Test API response:", testData);
-
-      alert("Login successful 🎉");
-      navigate("/");
+      // ✅ Redirect immediately (NO extra API calls here)
+      navigate("/", { replace: true });
 
     } catch (err) {
       console.error("❌ Login error:", err);
-      setError(err.message);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -122,7 +109,7 @@ export default function LoginForm() {
         </button>
 
         <p className="text-center text-sm text-slate-500 mt-4">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             to="/register"
             className="text-blue-600 cursor-pointer hover:underline"

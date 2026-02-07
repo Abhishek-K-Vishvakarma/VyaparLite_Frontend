@@ -1,29 +1,28 @@
 import { X, Check, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-
+import url from "../../network/UrlProvider";
 export default function NotificationPanel({ onClose }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch(`${ url }/notification/my`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (res.ok) setNotifications(data);
+      } catch (err) {
+        console.error("Notification fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchNotifications();
   }, []);
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch("/api/notification/my", {
-        credentials: "include",
-      });
-      const data = await res.json();
-      if (res.ok) setNotifications(data);
-    } catch (err) {
-      console.error("Notification fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const markAsRead = async (id) => {
-    await fetch(`/api/notification/read/${ id }`, {
+    await fetch(`${url}/notification/read/${ id }`, {
       method: "PATCH",
       credentials: "include",
     });
@@ -36,7 +35,7 @@ export default function NotificationPanel({ onClose }) {
   };
 
   const markAllAsRead = async () => {
-    await fetch("/api/notification/read-all", {
+    await fetch(`${url}/notification/read-all`, {
       method: "PATCH",
       credentials: "include",
     });
@@ -47,7 +46,7 @@ export default function NotificationPanel({ onClose }) {
   };
   const handleDeleteNotification = async (notificationId) => {
     try {
-      await fetch(`/api/notification/deleteNotification/${ notificationId }`, {
+      await fetch(`${url}/notification/deleteNotification/${ notificationId }`, {
         method: "DELETE",
         credentials: "include",
       });

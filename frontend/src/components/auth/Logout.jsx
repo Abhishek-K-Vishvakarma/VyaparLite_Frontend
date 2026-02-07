@@ -1,38 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import url from "../../network/UrlProvider";
 export default function Logout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   const handleLogout = async () => {
+    console.log(url);
     try {
       setLoading(true);
 
-      const res = await fetch("/auth/logout", {
+      const res = await fetch(`${url}/auth/logout`, {
         method: "POST",
         credentials: "include", // 🔥 Important for cookies
         headers: {
           "Content-Type": "application/json",
         },
       });
-
       const data = await res.json();
       console.log("📤 Logout response:", data);
-
-      if (res.ok) {
+      console.log(data);
+      if (res.ok) { 
         // Clear local storage
         localStorage.removeItem("user");
-
         console.log("✅ Logout successful");
-
         // Redirect to login
         navigate("/login");
       } else {
         throw new Error(data.message || "Logout failed");
       }
-
+      
     } catch (error) {
       console.error("❌ Logout error:", error);
       alert("Logout failed. Please try again.");

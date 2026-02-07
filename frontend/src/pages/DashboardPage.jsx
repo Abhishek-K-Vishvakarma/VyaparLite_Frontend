@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-const API_BASE = import.meta.env.VITE_API_URL;
-
+import url from "../network/UrlProvider.jsx";
 import StatCard from "../components/dashboard/StatsCard";
 import ReportsPage from "./ReportsPage";
 
@@ -15,13 +14,17 @@ export default function DashboardPage() {
     const fetchDashboardStats = async () => {
       try {
         /* -------- TODAY SALES + INVOICES -------- */
-        const dailyRes = await axios.get(`${API_BASE}/report/daily`);
+        const dailyRes = await axios.get(`${ url}/report/daily`,{
+          withCredentials: true
+        });
 
         setTodaySales(dailyRes.data.total);
         setInvoiceCount(dailyRes.data.count);
 
         /* -------- PRODUCTS -------- */
-        const productRes = await axios.get(`${API_BASE}/product/my-products`);
+        const productRes = await axios.get(`${ url}/product/my-products`,{
+          withCredentials: true
+        });
 
         setTotalProducts(productRes.data.length);
 
@@ -31,6 +34,7 @@ export default function DashboardPage() {
 
         setLowStockCount(lowStock.length);
       } catch (err) {
+        // throw new Error(err);
         console.error("Dashboard error:", err);
       }
     };
