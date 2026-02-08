@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getDeviceId } from "../../utils/device";
 import { getFCMToken } from "../../utils/fcm";
-const API_BASE = import.meta.env.VITE_API_URL;
-
+import url from "../../network/UrlProvider";
 export default function Register() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -37,7 +36,7 @@ export default function Register() {
       const deviceId = getDeviceId();
       const fcmToken = await getFCMToken();
 
-      const response = await fetch(`${API_BASE}/auth/register`, {
+      const response = await fetch(`${url}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -38,6 +38,12 @@ import BillingPage from './pages/BillingPage.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 import MyShop from './services/shop.jsx';
 import Footer from './components/ui/Footer.jsx';
+import { Toaster } from "sonner";
+import ForgotPassword from './components/auth/Forgot-Password.jsx';
+import VerifyOtp from './components/auth/Verify-OTP.jsx';
+import ResetPassword from './components/auth/ResetPassword.jsx';
+import ChangePassword from './components/auth/Change-Password.jsx';
+
 function App() {
   return (
     <Router>
@@ -45,14 +51,18 @@ function App() {
         {/* ============= PUBLIC ROUTES ============= */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
+        {/* <Toaster position="top-right" richColors /> */}
         {/* ============= PROTECTED ROUTES ============= */}
         <Route
           path="/"
           element={
             <ProtectedRoute>
               <DashboardLayout />
-              <Footer/>
+              <Footer />
             </ProtectedRoute>
           }
         >
@@ -64,13 +74,16 @@ function App() {
 
           {/* Billing */}
           <Route path="billing" element={<BillingPage />} />
-          <Route path='shop' element={<MyShop/>}/>
+          <Route path='shop' element={<MyShop />} />
+          <Route path='change-password' element={<ChangePassword />} />
         </Route>
 
         {/* ============= CATCH ALL ============= */}
         {/* Redirect any unknown route to home */}
+        {/* <Toaster position="top-right" richColors /> */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Toaster position="top-right" richColors />
     </Router>
   )
 }

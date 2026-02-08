@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast, Toaster } from "sonner";
 import AuthCard from "./AuthCard";
 import { getDeviceId } from "../../utils/device";
 import { getFCMToken } from "../../utils/fcm";
@@ -14,7 +15,6 @@ export default function LoginForm() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,7 +22,11 @@ export default function LoginForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+
+    if (!form.email || !form.password) {
+      toast.error("Email and password are required");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -32,7 +36,7 @@ export default function LoginForm() {
 
       const res = await fetch(`${ url }/auth/login`, {
         method: "POST",
-        credentials: "include", // 🔥 required for cookies
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
@@ -44,81 +48,77 @@ export default function LoginForm() {
         }),
       });
 
-      // 🔐 SAFELY parse response
-      let data = null;
-      const contentType = res.headers.get("content-type");
-
-      if (contentType && contentType.includes("application/json")) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        throw new Error(text || "Unexpected server response");
-      }
+      const data = await res.json();
 
       if (!res.ok) {
         throw new Error(data?.message || "Login failed");
       }
 
-      // ✅ Save minimal user info (NO TOKEN)
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      console.log("✅ Login successful, cookie set");
-
-      // ✅ Redirect immediately (NO extra API calls here)
+      toast.success("Login successful 🎉");
       navigate("/", { replace: true });
 
     } catch (err) {
-      console.error("❌ Login error:", err);
-      setError(err.message || "Something went wrong");
+      toast.error(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthCard subtitle="Smart billing for modern shops">
-      {error && (
-        <div className="mb-3 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
-          {error}
-        </div>
-      )}
+    <>
+      <Toaster richColors position="top-right" />
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <Input
-          name="email"
-          placeholder="Email Address"
-          value={form.email}
-          onChange={handleChange}
-        />
-
-        <Input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-        />
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full mt-2 bg-blue-600 hover:bg-blue-700
-          text-white py-3 rounded-xl font-medium transition disabled:opacity-60"
+      {/* 🔹 Page wrapper – gives mobile side spacing */}
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <AuthCard
+          subtitle="Smart billing for modern shops"
+          className="w-full max-w-xs sm:max-w-sm"
         >
-          {loading ? "Logging in..." : "Login"}
-        </button>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <Input
+              name="email"
+              placeholder="Email Address"
+              value={form.email}
+              onChange={handleChange}
+            />
 
-        <p className="text-center text-sm text-slate-500 mt-4">
-          Don&apos;t have an account?{" "}
-          <Link
-            to="/register"
-            className="text-blue-600 cursor-pointer hover:underline"
-          >
-            Register
-          </Link>
-        </p>
-      </form>
-    </AuthCard>
+            <Input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange}
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-2 bg-blue-600 hover:bg-blue-700
+            text-white py-2.5 rounded-xl font-medium transition
+            disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+
+            <p className="text-center text-sm text-slate-500 mt-3">
+              Don&apos;t have an account?{" "}
+              <Link to="/register" className="text-blue-600 hover:underline">
+                Register
+              </Link>
+            </p>
+
+            <p className="text-center text-sm text-slate-500 mt-2">
+              Forgot your password?{" "}
+              <Link to="/forgot" className="text-blue-600 hover:underline">
+                Reset here
+              </Link>
+            </p>
+          </form>
+        </AuthCard>
+      </div>
+    </>
   );
 }
 
@@ -132,7 +132,7 @@ function Input({ type = "text", placeholder, name, value, onChange }) {
       onChange={onChange}
       placeholder={placeholder}
       required
-      className="w-full px-4 py-3 rounded-xl border border-slate-300
+      className="w-full px-4 py-2.5 rounded-xl border border-slate-300
       focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
   );

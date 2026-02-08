@@ -7,14 +7,16 @@ import { calculateAmount } from "../utils/Calc";
 import { createSale } from "../services/SaleService";
 import { downloadInvoice } from "../services/InvoiceService";
 import url from "../network/UrlProvider";
+import { toast } from "sonner";
+
 export default function BillingPage({ token }) {
   const [products, setProducts] = useState([]);
   const [billItems, setBillItems] = useState([]);
 
   useEffect(() => {
-    axios.get(`${url}/product/my-products`, {
-        withCredentials: true
-      })
+    axios.get(`${ url }/product/my-products`, {
+      withCredentials: true
+    })
       .then((res) => setProducts(res.data))
       .catch(console.error);
   }, [token]);
@@ -71,7 +73,7 @@ export default function BillingPage({ token }) {
 
   const handleGenerateInvoice = async () => {
     if (!billItems.length) {
-      alert("No items in bill");
+      toast.error("No items in bill");
       return;
     }
 
@@ -92,7 +94,7 @@ export default function BillingPage({ token }) {
       setBillItems([]); // clear bill after success
     } catch (err) {
       console.error(err);
-      alert("Invoice generation failed");
+      throw new Error("Invoice generation failed");
     }
   };
 
