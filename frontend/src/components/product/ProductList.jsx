@@ -3,20 +3,33 @@ import { Toaster, toast } from "sonner";
 import AddProduct from "./AddProduct";
 import url from "../../network/UrlProvider";
 
+// ✅ FIXED: Proper stock formatting
 const formatStock = (stock, unit) => {
-  if (unit === "KG") return `${ stock / 1000 } KG`;
+  if (unit === "KG") {
+    const kg = Math.floor(stock);
+    const grams = Math.round((stock % 1) * 1000);
+
+    if (kg === 0 && grams > 0) {
+      return `${ grams } g`;
+    } else if (grams === 0) {
+      return `${ kg } KG`;
+    } else {
+      return `${ kg } KG ${ grams } g`;
+    }
+  }
   return `${ stock } ${ unit }`;
 };
 
+// ✅ FIXED: Low stock check
 const isLowStock = (p) => {
   const limits = {
-    KG: 5,
-    PIECE: 5,
-    BOTTLE: 5,
-    PACKET: 5,
+    KG: 5,        // 5 KG minimum
+    PIECE: 5,     // 5 pieces minimum
+    BOTTLE: 5,    // 5 bottles minimum
+    PACKET: 5,    // 5 packets minimum
   };
 
-  if (p.unit === "KG") return p.stock / 1000 <= limits.KG;
+  // For all units, stock is already in base unit
   return p.stock <= limits[p.unit];
 };
 
@@ -51,7 +64,8 @@ export default function ProductList() {
       const data = await res.json();
       setProducts(Array.isArray(data) ? data : data.products || []);
     } catch (err) {
-      toast.error("Failed to fetch products", {err});
+      toast.error("Failed to fetch products");
+      console.error(err);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -64,7 +78,7 @@ export default function ProductList() {
       return;
     }
 
-    if (!window.confirm("Delete this product?")) return;
+    if (!window.confirm(`Delete "${ p.name }"? This cannot be undone.`)) return;
 
     try {
       const res = await fetch(`${ url }/product/del-product/${ p._id }`, {
@@ -73,7 +87,7 @@ export default function ProductList() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      toast.success(data.message);
+      toast.success(data.message || "Product deleted successfully");
       fetchProducts();
     } catch (err) {
       toast.error(err.message || "Delete failed");
@@ -112,18 +126,25 @@ export default function ProductList() {
             ⚠️ Low Stock Products
           </h2>
 
-          {lowStockProducts.map((p) => (
-            <div
-              key={p._id}
-              className="mb-3 rounded-xl border-l-4 border-red-500
-              bg-red-50 px-4 py-3"
-            >
-              <p className="font-semibold">{p.name}</p>
-              <p className="text-sm">
-                Stock: {formatStock(p.stock, p.unit)}
-              </p>
-            </div>
-          ))}
+          {lowStockProducts.length === 0 ? (
+            <p className="text-center text-slate-500">No low stock products</p>
+          ) : (
+            lowStockProducts.map((p) => (
+              <div
+                key={p._id}
+                className="mb-3 rounded-xl border-l-4 border-red-500
+                bg-red-50 px-4 py-3"
+              >
+                <p className="font-semibold">{p.name}</p>
+                <p className="text-sm text-slate-700">
+                  Stock: <span className="font-bold">{formatStock(p.stock, p.unit)}</span>
+                </p>
+                <p className="text-xs text-slate-600 mt-1">
+                  ₹{p.price} / {p.unit}
+                </p>
+              </div>
+            ))
+          )}
         </Modal>
       )}
 
@@ -143,7 +164,7 @@ export default function ProductList() {
               <button
                 onClick={() => setShowLowStock(true)}
                 className="rounded-full bg-red-100 px-4 py-2
-                text-sm font-semibold text-red-700 hover:bg-red-200"
+                text-sm font-semibold text-red-700 hover:bg-red-200 transition"
               >
                 ⚠️ Low Stock ({lowStockProducts.length})
               </button>
@@ -152,7 +173,7 @@ export default function ProductList() {
             <button
               onClick={() => setCreate(true)}
               className="bg-blue-600 text-white px-4 py-2
-              rounded-lg hover:bg-blue-700"
+              rounded-lg hover:bg-blue-700 transition font-medium"
             >
               + Create Product
             </button>
@@ -160,12 +181,20 @@ export default function ProductList() {
         </div>
 
         {/* CONTENT */}
-        {loading && <p className="text-center">Loading...</p>}
+        {loading && (
+          <div className="text-center py-10">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+            <p className="mt-2 text-slate-600">Loading products...</p>
+          </div>
+        )}
 
         {!loading && products.length === 0 && (
-          <p className="text-center text-slate-400">
-            No products found
-          </p>
+          <div className="text-center py-10">
+            <p className="text-slate-400 text-lg">No products found</p>
+            <p className="text-slate-500 text-sm mt-2">
+              Click "Create Product" to add your first product
+            </p>
+          </div>
         )}
 
         {!loading && products.length > 0 && (
@@ -180,21 +209,21 @@ export default function ProductList() {
                   🕒 {formatIST(p.createdAt)}
                 </div>
 
-                <h3 className="text-lg font-semibold">{p.name}</h3>
+                <h3 className="text-lg font-semibold capitalize">{p.name}</h3>
 
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 mt-1">
                   ₹{p.price} / {p.unit}
                 </p>
 
-                <p className="text-sm mt-1">
-                  📦 Stock:
-                  <b className="ml-1">
+                <p className="text-sm mt-2">
+                  📦 Stock:{" "}
+                  <b className={`ml-1 ${ isLowStock(p) ? 'text-red-600' : 'text-green-600' }`}>
                     {formatStock(p.stock, p.unit)}
                   </b>
                 </p>
 
                 <span
-                  className={`inline-block mt-2 px-3 py-1 text-xs
+                  className={`inline-block mt-3 px-3 py-1 text-xs
                   font-semibold rounded-full ${ isLowStock(p)
                       ? "bg-red-100 text-red-700"
                       : "bg-green-100 text-green-700"
@@ -207,7 +236,7 @@ export default function ProductList() {
                   <button
                     onClick={() => setEditProduct(p)}
                     className="px-3 py-1 text-sm bg-blue-100
-                    text-blue-700 rounded-lg hover:bg-blue-200"
+                    text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium"
                   >
                     Edit
                   </button>
@@ -215,7 +244,7 @@ export default function ProductList() {
                   <button
                     onClick={() => handleDelete(p)}
                     className="px-3 py-1 text-sm bg-red-100
-                    text-red-700 rounded-lg hover:bg-red-200"
+                    text-red-700 rounded-lg hover:bg-red-200 transition font-medium"
                   >
                     Delete
                   </button>
@@ -229,7 +258,6 @@ export default function ProductList() {
   );
 }
 
-
 function Modal({ children, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -238,8 +266,8 @@ function Modal({ children, onClose }) {
         onClick={onClose}
       />
       <div
-        className="relative max-w-sm sm:max-w-md
-        bg-white rounded-2xl shadow-2xl p-5"
+        className="relative max-w-sm sm:max-w-md w-full
+        bg-white rounded-2xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto"
       >
         {children}
       </div>

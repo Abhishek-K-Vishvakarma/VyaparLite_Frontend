@@ -43,8 +43,10 @@ import ForgotPassword from './components/auth/Forgot-Password.jsx';
 import VerifyOtp from './components/auth/Verify-OTP.jsx';
 import ResetPassword from './components/auth/ResetPassword.jsx';
 import ChangePassword from './components/auth/Change-Password.jsx';
+import InvoiceList from './services/InvoiceList.jsx';
 
 function App() {
+  const userToken = localStorage.getItem("token"); // या context से
   return (
     <Router>
       <Routes>
@@ -76,6 +78,7 @@ function App() {
           <Route path="billing" element={<BillingPage />} />
           <Route path='shop' element={<MyShop />} />
           <Route path='change-password' element={<ChangePassword />} />
+          <Route path="invoices" element={<InvoiceList token={userToken} />} />
         </Route>
 
         {/* ============= CATCH ALL ============= */}

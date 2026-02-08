@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 export const createSale = async (payload) => {
   try {
-    toast.loading("Creating sale... 🧾");
+    const toastId = toast.loading("Creating sale... 🧾");
 
     const res = await fetch(`${ url }/sale/create`, {
       method: "POST",
@@ -28,7 +28,7 @@ export const createSale = async (payload) => {
     if (!res.ok) {
       throw new Error(data?.message || "Sale creation failed");
     }
-
+    toast.dismiss(toastId);
     toast.success("Sale created successfully ✅");
     return data;
 

@@ -13,7 +13,7 @@ export default function Sidebar({ open, setOpen }) {
         <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
           <Link to="/"><SidebarItem icon={<Home size={20} />} label="Dashboard" /></Link>
           <Link to="/product"><SidebarItem icon={<Package size={20} />} label="Products" /></Link>
-          <Link><SidebarItem icon={<FileText size={20} />} label="Invoices" /></Link>
+          <Link to="/invoices"><SidebarItem icon={<FileText size={20} />} label="Invoices" /></Link>
           <Link to="/billing"><SidebarItem icon={<CreditCard size={20} />} label="Billing" /></Link>
           <Link to="/shop"><SidebarItem icon={<ShoppingBag size={20} />} label="Shop" /></Link>
         </nav>
@@ -50,11 +50,13 @@ export default function Sidebar({ open, setOpen }) {
               onClick={() => setOpen(false)}
             />
           </Link>
+          <Link to="/invoices">
           <SidebarItem
             icon={<FileText size={20} />}
             label="Invoices"
             onClick={() => setOpen(false)}
           />
+          </Link>
           <Link to="/billing">
             <SidebarItem
               icon={<CreditCard size={20} />}

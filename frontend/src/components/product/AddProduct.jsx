@@ -1,182 +1,187 @@
-import { useEffect, useState } from "react";
-import { toast, Toaster } from "sonner";
+// components/products/AddProduct.jsx
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import url from "../../network/UrlProvider";
 
-export default function AddProduct({ onClose, editData, onSuccess }) {
-  const [form, setForm] = useState({
+const CATEGORIES = [
+  { value: "ESSENTIAL_FOOD", label: "Essential Food (0% GST)", gst: 0 },
+  { value: "PROCESSED_FOOD", label: "Processed Food (5% GST)", gst: 5 },
+  { value: "PACKED_FOOD", label: "Packed Food (12% GST)", gst: 12 },
+  { value: "BEVERAGES", label: "Beverages (18% GST)", gst: 18 },
+  { value: "MEDICINES", label: "Medicines (12% GST)", gst: 12 },
+  { value: "MEDICAL_DEVICES", label: "Medical Devices (12% GST)", gst: 12 },
+  { value: "COSMETICS", label: "Cosmetics (18% GST)", gst: 18 },
+  { value: "ELECTRONICS", label: "Electronics (18% GST)", gst: 18 },
+  { value: "MOBILE_PHONES", label: "Mobile Phones (18% GST)", gst: 18 },
+  { value: "CLOTHING_BASIC", label: "Basic Clothing (5% GST)", gst: 5 },
+  { value: "CLOTHING_PREMIUM", label: "Premium Clothing (12% GST)", gst: 12 },
+  { value: "GENERAL", label: "General (18% GST)", gst: 18 },
+];
+
+export default function AddProduct({ editData, onClose, onSuccess }) {
+  const [formData, setFormData] = useState({
     name: "",
+    category: "GENERAL",
     price: "",
-    stock: "",
     unit: "PIECE",
+    stock: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  const [selectedGST, setSelectedGST] = useState(18);
 
-  //  Edit mode: set EXACT saved values (no conversion)
   useEffect(() => {
     if (editData) {
-      let displayStock = editData.stock;
-      if (editData.unit === "KG") {
-        displayStock = editData.stock / 1000;
-      }
-      setForm({
-        name: editData.name,
-        price: editData.price,
-        stock: displayStock,   // FIX
-        unit: editData.unit,
+      setFormData({
+        name: editData.name || "",
+        category: editData.category || "GENERAL",
+        price: editData.price || "",
+        unit: editData.unit || "PIECE",
+        stock: editData.stock || "",
       });
+      setSelectedGST(editData.gstRate || 18);
     }
   }, [editData]);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleCategoryChange = (e) => {
+    const category = e.target.value;
+    const categoryObj = CATEGORIES.find(c => c.value === category);
+
+    setFormData({ ...formData, category });
+    setSelectedGST(categoryObj?.gst || 18);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
-      const apiUrl = editData
+      const endpoint = editData
         ? `${ url }/product/put-product/${ editData._id }`
         : `${ url }/product/add`;
 
       const method = editData ? "PUT" : "POST";
 
-      const res = await fetch(apiUrl, {
+      const res = await fetch(endpoint, {
         method,
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          stock: Number(form.stock), // ✅ ensure number
-          price: Number(form.price),
-        }),
+        credentials: "include",
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data?.message);
+      if (!res.ok) throw new Error(data.message);
 
-      toast.success(
-        editData ? "Product updated successfully" : "Product added successfully"
-      );
-
-      onSuccess?.();
+      toast.success(data.message || "Product saved successfully");
+      onSuccess();
       onClose();
     } catch (err) {
       toast.error(err.message || "Failed to save product");
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <>
-      <Toaster richColors position="top-right" />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-xl font-bold">
+        {editData ? "Edit Product" : "Add Product"}
+      </h2>
 
-      <div className="w-full max-w-sm bg-white rounded-2xl p-6">
-        {/* Branding */}
-        <p className="text-xs font-semibold text-blue-600 mb-1">
-          VyaparLite
-        </p>
-
-        <h2 className="text-lg font-bold mb-4">
-          {editData ? "Edit Product" : "Add Product"}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Product Name">
-            <Input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="e.g. Sugar"
-            />
-          </Field>
-
-          <Field label="Price">
-            <Input
-              name="price"
-              type="number"
-              value={form.price}
-              onChange={handleChange}
-              placeholder="e.g. 50"
-            />
-          </Field>
-
-          <Field label="Stock Quantity">
-            <Input
-              name="stock"
-              type="number"
-              value={form.stock}
-              onChange={handleChange}
-              placeholder="e.g. 20"
-            />
-          </Field>
-
-          <Field label="Unit">
-            <select
-              name="unit"
-              value={form.unit}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              hover:border-blue-400 transition"
-            >
-              <option value="KG">KG</option>
-              <option value="PIECE">Piece</option>
-              <option value="BOTTLE">Bottle</option>
-              <option value="PACKET">Packet</option>
-            </select>
-          </Field>
-
-          <div className="flex justify-end gap-3 pt-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100"
-            >
-              Cancel
-            </button>
-
-            <button
-              disabled={loading}
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white
-              hover:bg-blue-700 transition disabled:opacity-60"
-            >
-              {loading
-                ? "Saving..."
-                : editData
-                  ? "Update Product"
-                  : "Create Product"}
-            </button>
-          </div>
-        </form>
+      {/* Product Name */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Product Name</label>
+        <input
+          type="text"
+          required
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          className="w-full border rounded px-3 py-2"
+          placeholder="e.g., Sugar, Dolo 650"
+        />
       </div>
-    </>
-  );
-}
 
-/* 🔹 Field Wrapper with Label */
-function Field({ label, children }) {
-  return (
-    <div className="space-y-1">
-      <label className="text-sm font-medium text-gray-600">{label}</label>
-      {children}
-    </div>
-  );
-}
+      {/* Category */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Category</label>
+        <select
+          value={formData.category}
+          onChange={handleCategoryChange}
+          className="w-full border rounded px-3 py-2"
+        >
+          {CATEGORIES.map((cat) => (
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-slate-600 mt-1">
+          GST Rate: <span className="font-semibold">{selectedGST}%</span>
+        </p>
+      </div>
 
-/* 🔹 Reusable Input */
-function Input({ type = "text", ...props }) {
-  return (
-    <input
-      type={type}
-      {...props}
-      required
-      className="w-full px-4 py-3 rounded-xl border border-slate-300
-      focus:outline-none focus:ring-2 focus:ring-blue-500
-      hover:border-blue-400 transition"
-    />
+      {/* Price */}
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Price (per {formData.unit})
+        </label>
+        <input
+          type="number"
+          required
+          min="0"
+          step="0.01"
+          value={formData.price}
+          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          className="w-full border rounded px-3 py-2"
+          placeholder="e.g., 48"
+        />
+      </div>
+
+      {/* Unit */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Unit</label>
+        <select
+          value={formData.unit}
+          onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+          className="w-full border rounded px-3 py-2"
+        >
+          <option value="KG">KG (Kilogram)</option>
+          <option value="PIECE">PIECE</option>
+          <option value="BOTTLE">BOTTLE</option>
+          <option value="PACKET">PACKET</option>
+        </select>
+      </div>
+
+      {/* Stock */}
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Stock ({formData.unit})
+        </label>
+        <input
+          type="number"
+          required
+          min="0"
+          step={formData.unit === "KG" ? "0.001" : "1"}
+          value={formData.stock}
+          onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+          className="w-full border rounded px-3 py-2"
+          placeholder={formData.unit === "KG" ? "e.g., 50 (means 50 KG)" : "e.g., 100"}
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-3">
+        <button
+          type="submit"
+          className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+        >
+          {editData ? "Update" : "Add"} Product
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 border rounded-lg hover:bg-slate-100"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
   );
 }

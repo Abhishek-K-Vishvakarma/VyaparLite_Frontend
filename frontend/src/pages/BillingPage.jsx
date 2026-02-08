@@ -27,18 +27,26 @@ export default function BillingPage({ token }) {
 
     if (exists) {
       const newQty = exists.qty + qty;
+      const newKg = product.unit === "KG" ? Math.floor(newQty) : 0;
+      const newGrams = product.unit === "KG" ? Math.round((newQty % 1) * 1000) : 0;
+
       setBillItems(
         billItems.map((item) =>
           item._id === product._id
             ? {
               ...item,
               qty: newQty,
+              kg: newKg,
+              grams: newGrams,
               amount: calculateAmount(item.price, item.unit, newQty),
             }
             : item
         )
       );
     } else {
+      const kg = product.unit === "KG" ? Math.floor(qty) : 0;
+      const grams = product.unit === "KG" ? Math.round((qty % 1) * 1000) : 0;
+
       setBillItems([
         ...billItems,
         {
@@ -47,20 +55,24 @@ export default function BillingPage({ token }) {
           price: product.price,
           unit: product.unit,
           qty,
+          kg,
+          grams,
           amount,
         },
       ]);
     }
   };
 
-  const updateQty = (id, qty) => {
+  const updateQty = (id, totalQty, kg = null, grams = null) => {
     setBillItems(
       billItems.map((item) =>
         item._id === id
           ? {
             ...item,
-            qty,
-            amount: calculateAmount(item.price, item.unit, qty),
+            qty: totalQty,
+            kg: kg !== null ? Number(kg) : item.kg || 0,
+            grams: grams !== null ? Number(grams) : item.grams || 0,
+            amount: calculateAmount(item.price, item.unit, totalQty),
           }
           : item
       )
@@ -82,7 +94,7 @@ export default function BillingPage({ token }) {
         paymentMethod: "CASH",
         items: billItems.map((item) => ({
           product: item._id,
-          quantity: item.qty,
+          quantity: item.qty, // This is the total in base unit (1.5 for 1kg 500g)
         })),
       };
 
@@ -92,9 +104,17 @@ export default function BillingPage({ token }) {
       await downloadInvoice(invoiceId, token);
 
       setBillItems([]); // clear bill after success
+
+      // Refresh products to show updated stock
+      axios.get(`${ url }/product/my-products`, {
+        withCredentials: true
+      })
+        .then((res) => setProducts(res.data))
+        .catch(console.error);
+
     } catch (err) {
       console.error(err);
-      throw new Error("Invoice generation failed");
+      toast.error(err.message || "Invoice generation failed");
     }
   };
 
@@ -112,14 +132,14 @@ export default function BillingPage({ token }) {
         />
 
         <BillSummary items={billItems} />
-
-        <button
-          onClick={handleGenerateInvoice}
-          className="bg-green-600 text-white px-6 py-3 rounded-lg w-full"
-        >
-          Generate Invoice
-        </button>
       </div>
+
+      <button
+        onClick={handleGenerateInvoice}
+        className="bg-green-600 text-white px-6 py-3 rounded-lg w-full hover:bg-green-700 transition"
+      >
+        Generate Invoice
+      </button>
     </div>
   );
 }

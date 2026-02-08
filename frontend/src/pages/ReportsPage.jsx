@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 import SalesChart from "../components/reports/SalesChart";
-import ProductChart from "../components/reports/ProductChart";
+// import ProductChart from "../components/reports/ProductChart";
 import StockAlertCard from "../components/reports/StockAlertCard";
 import url from "../network/UrlProvider";
 export default function ReportsPage() {
   const [dailySales, setDailySales] = useState([]);
   const [monthlySales, setMonthlySales] = useState([]);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [lowStockCount, setLowStockCount] = useState(0);
+  // const [totalProducts, setTotalProducts] = useState(0);
+  // const [lowStockCount, setLowStockCount] = useState(0);
   const [lowStockItems, setLowStockItems] = useState([]);
-
+  console.log(lowStockItems)
   /* ---------------- FETCH REPORTS ---------------- */
   useEffect(() => {
     /* -------- DAILY SALES CHART -------- */
@@ -49,11 +49,11 @@ export default function ReportsPage() {
         withCredentials: true
       });
 
-      setTotalProducts(res.data.length);
+      // setTotalProducts(res.data.length);
 
       const lowStock = res.data.filter((p) => p.stock <= 5);
 
-      setLowStockCount(lowStock.length);
+      // setLowStockCount(lowStock.length);
       setLowStockItems(lowStock);
     };
     fetchDailyChart();
@@ -83,13 +83,13 @@ export default function ReportsPage() {
       {/* PRODUCTS & STOCK */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <ProductChart
+        {/* <ProductChart
           total={totalProducts}
           lowStock={lowStockCount}
-        />
+        /> */}
 
         {/* LOW STOCK LIST */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5">
+        {/* <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-5">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">
             ⚠ Low Stock Alerts
           </h2>
@@ -109,7 +109,7 @@ export default function ReportsPage() {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );
