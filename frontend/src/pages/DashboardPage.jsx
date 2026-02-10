@@ -53,7 +53,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard
           title="Today's Sales"
-          value={`₹${ todaySales }`}
+          value={`₹${ Math.ceil(todaySales) }`}
           type="sale"
         />
 

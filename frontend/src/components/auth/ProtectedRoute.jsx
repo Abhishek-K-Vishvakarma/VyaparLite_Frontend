@@ -1,21 +1,16 @@
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import url from "../../network/UrlProvider";
+import api from "../../network/axiosInstance";
+
 export default function ProtectedRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch(`${url}/auth/myProfile`, {
-          method: "GET",
-          credentials: "include", // COOKIE IMPORTANT
-        });
-
-        if (res.ok) {
+        const res = await api.get("/auth/myProfile");
+        if (res.status === 200) {
           setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
         }
       } catch (err) {
         setIsAuthenticated(false);

@@ -26,7 +26,7 @@ export default function AddProduct({ editData, onClose, onSuccess }) {
     unit: "PIECE",
     stock: "",
   });
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGST, setSelectedGST] = useState(18);
 
   useEffect(() => {
@@ -52,6 +52,7 @@ export default function AddProduct({ editData, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // 🔥 start loader
 
     try {
       const endpoint = editData
@@ -76,35 +77,61 @@ export default function AddProduct({ editData, onClose, onSuccess }) {
       onClose();
     } catch (err) {
       toast.error(err.message || "Failed to save product");
+    } finally {
+      setIsSubmitting(false); // 🔥 stop loader
     }
   };
 
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-bold">
-        {editData ? "Edit Product" : "Add Product"}
-      </h2>
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5 bg-white rounded-2xl p-6 shadow-lg"
+    >
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="text-xs font-semibold text-blue-600 tracking-wide">
+            VyaparLite
+          </p>
+          <h2 className="text-xl font-bold text-slate-800">
+            {editData ? "Edit Product" : "Add Product"}
+          </h2>
+        </div>
+      </div>
 
       {/* Product Name */}
       <div>
-        <label className="block text-sm font-medium mb-1">Product Name</label>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Product Name
+        </label>
         <input
           type="text"
           required
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full border rounded px-3 py-2"
+          onChange={(e) =>
+            setFormData({ ...formData, name: e.target.value })
+          }
           placeholder="e.g., Sugar, Dolo 650"
+          className="w-full rounded-lg border border-slate-300
+      px-3 py-2 text-sm
+      transition focus:ring-2 focus:ring-blue-500
+      focus:border-blue-500 hover:border-slate-400 outline-none"
         />
       </div>
 
       {/* Category */}
       <div>
-        <label className="block text-sm font-medium mb-1">Category</label>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Category
+        </label>
         <select
           value={formData.category}
           onChange={handleCategoryChange}
-          className="w-full border rounded px-3 py-2"
+          className="w-full rounded-lg border border-slate-300
+      px-3 py-2 text-sm bg-white
+      transition focus:ring-2 focus:ring-blue-500
+      focus:border-blue-500 hover:border-slate-400 outline-none"
         >
           {CATEGORIES.map((cat) => (
             <option key={cat.value} value={cat.value}>
@@ -112,14 +139,14 @@ export default function AddProduct({ editData, onClose, onSuccess }) {
             </option>
           ))}
         </select>
-        <p className="text-xs text-slate-600 mt-1">
+        <p className="text-xs text-slate-500 mt-1">
           GST Rate: <span className="font-semibold">{selectedGST}%</span>
         </p>
       </div>
 
       {/* Price */}
       <div>
-        <label className="block text-sm font-medium mb-1">
+        <label className="block text-sm font-medium text-slate-700 mb-1">
           Price (per {formData.unit})
         </label>
         <input
@@ -128,19 +155,31 @@ export default function AddProduct({ editData, onClose, onSuccess }) {
           min="0"
           step="0.01"
           value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-          className="w-full border rounded px-3 py-2"
+          onChange={(e) =>
+            setFormData({ ...formData, price: e.target.value })
+          }
           placeholder="e.g., 48"
+          className="w-full rounded-lg border border-slate-300
+      px-3 py-2 text-sm
+      transition focus:ring-2 focus:ring-blue-500
+      focus:border-blue-500 hover:border-slate-400 outline-none"
         />
       </div>
 
       {/* Unit */}
       <div>
-        <label className="block text-sm font-medium mb-1">Unit</label>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Unit
+        </label>
         <select
           value={formData.unit}
-          onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-          className="w-full border rounded px-3 py-2"
+          onChange={(e) =>
+            setFormData({ ...formData, unit: e.target.value })
+          }
+          className="w-full rounded-lg border border-slate-300
+      px-3 py-2 text-sm bg-white
+      transition focus:ring-2 focus:ring-blue-500
+      focus:border-blue-500 hover:border-slate-400 outline-none"
         >
           <option value="KG">KG (Kilogram)</option>
           <option value="PIECE">PIECE</option>
@@ -151,7 +190,7 @@ export default function AddProduct({ editData, onClose, onSuccess }) {
 
       {/* Stock */}
       <div>
-        <label className="block text-sm font-medium mb-1">
+        <label className="block text-sm font-medium text-slate-700 mb-1">
           Stock ({formData.unit})
         </label>
         <input
@@ -160,28 +199,47 @@ export default function AddProduct({ editData, onClose, onSuccess }) {
           min="0"
           step={formData.unit === "KG" ? "0.001" : "1"}
           value={formData.stock}
-          onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-          className="w-full border rounded px-3 py-2"
-          placeholder={formData.unit === "KG" ? "e.g., 50 (means 50 KG)" : "e.g., 100"}
+          onChange={(e) =>
+            setFormData({ ...formData, stock: e.target.value })
+          }
+          placeholder={
+            formData.unit === "KG"
+              ? "e.g., 50 (means 50 KG)"
+              : "e.g., 100"
+          }
+          className="w-full rounded-lg border border-slate-300
+      px-3 py-2 text-sm
+      transition focus:ring-2 focus:ring-blue-500
+      focus:border-blue-500 hover:border-slate-400 outline-none"
         />
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 pt-3">
         <button
           type="submit"
-          className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+          disabled={isSubmitting}
+          className={`flex-1 flex items-center justify-center gap-2
+  py-2 rounded-lg font-medium shadow transition
+  ${ isSubmitting
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg text-white"
+            }`}
         >
-          {editData ? "Update" : "Add"} Product
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 border rounded-lg hover:bg-slate-100"
-        >
-          Cancel
+          {isSubmitting && (
+            <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></span>
+          )}
+
+          {isSubmitting
+            ? editData
+              ? "Updating..."
+              : "Adding..."
+            : editData
+              ? "Update Product"
+              : "Add Product"}
         </button>
       </div>
     </form>
+
   );
 }

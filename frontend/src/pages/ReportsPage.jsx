@@ -22,9 +22,8 @@ export default function ReportsPage() {
 
       const formatted = res.data.map((item) => ({
         label: `${ item._id.day }/${ item._id.month }`,
-        value: item.total,
+        value: Math.ceil(item.total),
       }));
-
       setDailySales(formatted);
     };
 
@@ -38,7 +37,7 @@ export default function ReportsPage() {
       setMonthlySales([
         {
           label: res.data.month,
-          value: res.data.total,
+          value: Math.ceil(res.data.total),
         },
       ]);
     };

@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import { Toaster, toast } from "sonner";
 import AddProduct from "./AddProduct";
 import url from "../../network/UrlProvider";
+import {
+  Clock,
+  Package,
+  AlertTriangle,
+  Plus,
+  Pencil,
+  Trash2
+} from "lucide-react";
 
 // ✅ FIXED: Proper stock formatting
 const formatStock = (stock, unit) => {
@@ -163,10 +171,16 @@ export default function ProductList() {
             {lowStockProducts.length > 0 && (
               <button
                 onClick={() => setShowLowStock(true)}
-                className="rounded-full bg-red-100 px-4 py-2
-                text-sm font-semibold text-red-700 hover:bg-red-200 transition"
+                className="relative flex items-center gap-2 rounded-full
+    bg-red-100 px-4 py-2 text-sm font-semibold text-red-700
+    hover:bg-red-200 transition
+    animate-pulse"
               >
-                ⚠️ Low Stock ({lowStockProducts.length})
+                <AlertTriangle size={16} />
+                Low Stock ({lowStockProducts.length})
+
+                {/* glow */}
+                <span className="absolute inset-0 rounded-full bg-red-400 opacity-20 blur-md"></span>
               </button>
             )}
 
@@ -202,51 +216,75 @@ export default function ProductList() {
             {products.map((p) => (
               <div
                 key={p._id}
-                className="relative rounded-2xl bg-slate-50
-                px-5 py-4 shadow hover:shadow-lg transition"
+                className="group relative rounded-2xl bg-white
+    border border-slate-200 p-5
+    shadow-sm hover:shadow-xl
+    hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="absolute top-3 right-4 text-xs text-slate-500">
-                  🕒 {formatIST(p.createdAt)}
+                {/* Created time */}
+                <div className="absolute top-4 right-4 flex items-center gap-1 text-xs text-slate-500">
+                  <Clock size={14} />
+                  {formatIST(p.createdAt)}
                 </div>
 
-                <h3 className="text-lg font-semibold capitalize">{p.name}</h3>
+                {/* Product name */}
+                <h3 className="text-lg font-semibold capitalize text-slate-800">
+                  {p.name}
+                </h3>
 
-                <p className="text-sm text-slate-600 mt-1">
+                {/* Price */}
+                <p className="mt-1 text-sm text-slate-600">
                   ₹{p.price} / {p.unit}
                 </p>
 
-                <p className="text-sm mt-2">
-                  📦 Stock:{" "}
-                  <b className={`ml-1 ${ isLowStock(p) ? 'text-red-600' : 'text-green-600' }`}>
-                    {formatStock(p.stock, p.unit)}
-                  </b>
-                </p>
+                {/* Stock */}
+                <div className="mt-3 flex items-center gap-2 text-sm">
+                  <Package size={16} className="text-slate-500" />
+                  <span>
+                    Stock:
+                    <b
+                      className={`ml-1 ${ isLowStock(p)
+                        ? "text-red-600"
+                        : "text-green-600"
+                        }`}
+                    >
+                      {formatStock(p.stock, p.unit)}
+                    </b>
+                  </span>
+                </div>
 
+                {/* Status badge */}
                 <span
-                  className={`inline-block mt-3 px-3 py-1 text-xs
-                  font-semibold rounded-full ${ isLowStock(p)
+                  className={`inline-flex items-center gap-1 mt-3 px-3 py-1 text-xs
+      font-semibold rounded-full
+      ${ isLowStock(p)
                       ? "bg-red-100 text-red-700"
                       : "bg-green-100 text-green-700"
                     }`}
                 >
+                  <AlertTriangle size={12} />
                   {isLowStock(p) ? "LOW STOCK" : "IN STOCK"}
                 </span>
 
-                <div className="absolute right-4 bottom-4 flex gap-2">
+                {/* Actions */}
+                <div
+                  className="absolute right-4 bottom-4 flex gap-2
+      opacity-0 group-hover:opacity-100 transition"
+                >
                   <button
                     onClick={() => setEditProduct(p)}
-                    className="px-3 py-1 text-sm bg-blue-100
-                    text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium"
+                    className="p-2 bg-blue-100 text-blue-700
+        rounded-lg hover:bg-blue-200 transition"
                   >
-                    Edit
+                    <Pencil size={16} />
                   </button>
 
                   <button
                     onClick={() => handleDelete(p)}
-                    className="px-3 py-1 text-sm bg-red-100
-                    text-red-700 rounded-lg hover:bg-red-200 transition font-medium"
+                    className="p-2 bg-red-100 text-red-700
+        rounded-lg hover:bg-red-200 transition"
                   >
-                    Delete
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>
